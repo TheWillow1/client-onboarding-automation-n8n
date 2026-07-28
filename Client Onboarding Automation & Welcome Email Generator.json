@@ -1,0 +1,928 @@
+{
+  "name": "Client Onboarding Automation & Welcome Email Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "clientName",
+              "type": "string",
+              "value": "={{ $json.body.responses['Full Name'] || '' }}"
+            },
+            {
+              "id": "id-2",
+              "name": "clientEmail",
+              "type": "string",
+              "value": "={{ $json.body.responses['Email address '] || '' }}"
+            },
+            {
+              "id": "id-3",
+              "name": "projectType",
+              "type": "string",
+              "value": "={{ $json.body.responses['Project Type'] || '' }}"
+            },
+            {
+              "id": "id-4",
+              "name": "company",
+              "type": "string",
+              "value": "={{ $json.body.responses['Company Name'] || '' }}"
+            },
+            {
+              "id": "id-5",
+              "name": "phone",
+              "type": "string",
+              "value": "={{ $json.body.responses['Phone Number'] || '' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "802784ce-d92c-40f8-a089-438e54249d58",
+      "name": "Normalize Client Data",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1280,
+        416
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "## Main\nThis workflow automates consulting client onboarding, task creation, and routing. AI generates a checklist based on project type and assigns tasks to the correct team member.\n\n## Setup\n1. Connect your Webhook/Form credentials for client intake.\n2. Configure Google Sheets to store client info.\n3. Connect LLM credentials for checklist/task generation.\n4. Connect Slack for internal notifications.\n5. Connect email for client communication.\n6. Optional: CRM integration for automated logging.\n\n\n",
+        "height": 576,
+        "width": 336
+      },
+      "id": "75a6d78d-f8a6-4e38-ad85-6b4c590e485d",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2128,
+        240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1024,
+        416
+      ],
+      "id": "175ccf4d-325a-41ca-aa5c-eb6c4ccbfa24",
+      "name": "Wait",
+      "webhookId": "7bd84f6c-c92e-4230-bfb9-54b32b7e5c0f"
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxTokensToSample": 4096
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        624
+      ],
+      "id": "35b0e4a3-ad10-4077-a88e-cfd18819417d",
+      "name": "Groq Chat Model"
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 5000,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -848,
+        624
+      ],
+      "id": "517a0d9b-7f89-477b-8ad9-461c024b31cd",
+      "name": "OpenRouter Chat Model"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "client-intake",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "628030ae-529f-4b62-b9c2-f2057198571e",
+      "name": "New Client Intake Form",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -1552,
+        416
+      ],
+      "webhookId": "5a174f63-09f4-4cdd-a80e-c338c49ed327",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "content": "## 1. Client Data Collection \n\nCollects client data from form submissions. \n",
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1616,
+        224
+      ],
+      "id": "fdd6d2dd-f22c-409e-96e2-7a8e54d03926",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Normalize Client Data').item.json.projectType }}",
+                    "rightValue": "Strategy",
+                    "id": "3663b129-c80a-4fbd-be04-1d6a13580f0b"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Strategy"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Normalize Client Data').item.json.projectType }}",
+                    "rightValue": "Management",
+                    "id": "31527901-7b36-4ef2-9a34-4bc66ad73552"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Management"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('Normalize Client Data').item.json.projectType }}",
+                    "rightValue": "IT",
+                    "id": "5772c36e-0047-43a2-8e16-09cc4a20b720"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "IT"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "86b8ec6f-0172-4c0f-ac0f-94e6f1a7e9f7",
+      "name": "Route by Project Type",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        -448,
+        400
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        }
+      },
+      "id": "45e70a15-b586-4b50-bf44-b1efc8d9a414",
+      "name": "Log to Google Sheets - Strategy",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -176,
+        256
+      ],
+      "typeVersion": 4.7
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1xGkMh2AcshRxA5VKSS68EbsZWmjowC6471AxlXD0iII",
+          "mode": "list",
+          "cachedResultName": "Diamond Consultancy Company Limited",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xGkMh2AcshRxA5VKSS68EbsZWmjowC6471AxlXD0iII/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 878366936,
+          "mode": "list",
+          "cachedResultName": "Management Clients",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xGkMh2AcshRxA5VKSS68EbsZWmjowC6471AxlXD0iII/edit#gid=878366936"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Full Name": "={{ $('Normalize Client Data').item.json.clientName }}",
+            "Phone Number": "={{ $('Normalize Client Data').item.json.phone }}",
+            "Company Name": "={{ $('Normalize Client Data').item.json.company }}",
+            "Project Type": "={{ $('Normalize Client Data').item.json.projectType }}",
+            "Email address ": "={{ $('Normalize Client Data').item.json.clientEmail }}"
+          },
+          "matchingColumns": [
+            "Full Name"
+          ],
+          "schema": [
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email address ",
+              "displayName": "Email address ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Project Type",
+              "displayName": "Project Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "1a81e6f9-dba9-4595-aab3-0345d709cb84",
+      "name": "Log to Google Sheets - Management",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -176,
+        416
+      ],
+      "typeVersion": 4.7
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "=",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1212711644,
+          "mode": "list",
+          "cachedResultName": "IT Clients",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xGkMh2AcshRxA5VKSS68EbsZWmjowC6471AxlXD0iII/edit#gid=1212711644"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Full Name": "={{ $('Normalize Client Data').item.json.clientName }}",
+            "Email address ": "={{ $('Normalize Client Data').item.json.clientEmail }}",
+            "Phone Number": "={{ $('Normalize Client Data').item.json.phone }}",
+            "Company Name": "={{ $('Normalize Client Data').item.json.company }}",
+            "Project Type": "={{ $('Normalize Client Data').item.json.projectType }}"
+          },
+          "matchingColumns": [
+            "Full Name"
+          ],
+          "schema": [
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email address ",
+              "displayName": "Email address ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Project Type",
+              "displayName": "Project Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "3fc16d75-e2ee-431c-8681-90bed6a37a0a",
+      "name": "Log to Google Sheets - IT",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -176,
+        576
+      ],
+      "typeVersion": 4.7
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        },
+        "text": "=🎯 *New Strategy Client Assigned*\n\n*Client:* {{ $('Normalize Client Data').item.json.clientName }}\n*Company:* {{ $('Normalize Client Data').item.json.company }}\n*Email:* {{ $('Normalize Client Data').item.json.clientEmail }}\n*Phone:* {{ $('Normalize Client Data').item.json.phone }}\n\n*Onboarding Checklist:*\n{{ \n  $('Checklist & Task').item.json.text \n    ? JSON.parse($('Checklist & Task').item.json.text.replace(/```json|```/g, \"\").trim()).checklist.map((item, i) => `${i + 1}. ${item}`).join(\"\\n\") \n    : \"See full details in Google Sheets\" \n}}\n\n*First Tasks:*\n{{ \n  $('Checklist & Task').item.json.text \n    ? JSON.parse($('Checklist & Task').item.json.text.replace(/```json|```/g, \"\").trim()).firstTasks.map((item, i) => `${i + 1}. ${item}`).join(\"\\n\") \n    : \"See full details in Google Sheets\" \n}}\n",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "381b3ae8-15e9-457f-a096-f8a3f64a0adf",
+      "name": "Notify Strategy Consultant",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        80,
+        256
+      ],
+      "webhookId": "d8864666-301e-479c-8ef1-fe31dea7593f",
+      "typeVersion": 2.4
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0BKA7LNDL3",
+          "mode": "list",
+          "cachedResultName": "management-consultant"
+        },
+        "text": "=🎯 *New Management Client Assigned*\n\n*Client:* {{ $('Normalize Client Data').item.json.clientName }}\n*Company:* {{ $('Normalize Client Data').item.json.company }}\n*Email:* {{ $('Normalize Client Data').item.json.clientEmail }}\n*Phone:* {{ $('Normalize Client Data').item.json.phone }}\n\n*Onboarding Checklist:*\n{{ \n  $('Checklist & Task').item.json.text \n    ? JSON.parse($('Checklist & Task').item.json.text.replace(/```json|```/g, \"\").trim()).checklist.map((item, i) => `${i + 1}. ${item}`).join(\"\\n\") \n    : \"See full details in Google Sheets\" \n}}\n\n*First Tasks:*\n{{ \n  $('Checklist & Task').item.json.text \n    ? JSON.parse($('Checklist & Task').item.json.text.replace(/```json|```/g, \"\").trim()).firstTasks.map((item, i) => `${i + 1}. ${item}`).join(\"\\n\") \n    : \"See full details in Google Sheets\" \n}}\n",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "86f89b79-7135-4633-807e-a5f649c99c66",
+      "name": "Notify Management Consultant",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        80,
+        416
+      ],
+      "webhookId": "d8864666-301e-479c-8ef1-fe31dea7593f",
+      "typeVersion": 2.4
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0BKAE70JG3",
+          "mode": "list",
+          "cachedResultName": "it-consultant"
+        },
+        "text": "=🎯 *New IT Client Assigned*\n\n*Client:* {{ $('Normalize Client Data').item.json.clientName }}\n*Company:* {{ $('Normalize Client Data').item.json.company }}\n*Email:* {{ $('Normalize Client Data').item.json.clientEmail }}\n*Phone:* {{ $('Normalize Client Data').item.json.phone }}\n\n*Onboarding Checklist:*\n{{ \n  $('Checklist & Task').item.json.text \n    ? JSON.parse($('Checklist & Task').item.json.text.replace(/```json|```/g, \"\").trim()).checklist.map((item, i) => `${i + 1}. ${item}`).join(\"\\n\") \n    : \"See full details in Google Sheets\" \n}}\n\n*First Tasks:*\n{{ \n  $('Checklist & Task').item.json.text \n    ? JSON.parse($('Checklist & Task').item.json.text.replace(/```json|```/g, \"\").trim()).firstTasks.map((item, i) => `${i + 1}. ${item}`).join(\"\\n\") \n    : \"See full details in Google Sheets\" \n}}\n",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "id": "cadd2bad-7e39-456f-b601-a36512b8a0e3",
+      "name": "Notify IT Consultant",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        80,
+        576
+      ],
+      "webhookId": "d8864666-301e-479c-8ef1-fe31dea7593f",
+      "typeVersion": 2.4
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Normalize Client Data').item.json.clientEmail }}",
+        "subject": "=Welcome to Our Consulting Services - {{ $('Normalize Client Data').item.json.clientName }}",
+        "message": "=<html>\n<body style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #333;\">\n  <h2 style=\"color: #0066cc;\">Welcome, {{ $('Normalize Client Data').item.json.clientName }}! 🎉</h2>\n  \n  <p>Thank you for choosing our consulting services. We're excited to partner with you on your <strong>{{ $('Normalize Client Data').item.json.projectType }}</strong> project.</p>\n  \n  <h3>What's Next?</h3>\n  <p>Your dedicated consultant has been assigned and will reach out shortly to schedule your kickoff meeting.</p>\n  \n  <h3>Your Onboarding Checklist:</h3>\n  <ul>\n    {{ \n  $('Checklist & Task').item.json.text \n    ? JSON.parse($('Checklist & Task').item.json.text.replace(/```json|```/g, \"\").trim()).checklist.map(item => `<li>${item}</li>`).join(\"\") \n    : \"<li>Details will be shared in your kickoff meeting</li>\" \n}}\n  </ul>\n  \n  <h3>First Tasks:</h3>\n  <ul>\n    {{ \n  $('Checklist & Task').item.json.text \n    ? JSON.parse($('Checklist & Task').item.json.text.replace(/```json|```/g, \"\").trim()).firstTasks.map(item => `<li>${item}</li>`).join(\"\") \n    : \"<li>Details will be shared in your kickoff meeting</li>\" \n}}\n  </ul>\n  \n  <p>If you have any questions, feel free to reply to this email.</p>\n  \n  <p>Best regards,<br>Your Consulting Team</p>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "860a7bdb-01ba-4f39-802b-d31b68e6de6c",
+      "name": "Send Email to Client",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        384,
+        416
+      ],
+      "webhookId": "2a07b507-23a6-4bfb-adff-997d30ea3dfa",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        },
+        "start": "={{ $now.plus(2, 'days').set({ hour: 10, minute: 0 }).toISO() }}",
+        "end": "={{ $now.plus(2, 'days').set({ hour: 11, minute: 0 }).toISO() }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $('Normalize Client Data').item.json.clientEmail }}"
+          ],
+          "description": "=Initial kickoff meeting for an {{ $('Normalize Client Data').item.json.projectType }} project with {{ $('Normalize Client Data').item.json.clientName }} from {{ $('Normalize Client Data').item.json.company }}.\n\nAgenda:\n- Introductions\n- Project overview\n- Timeline and deliverables\n- Next steps",
+          "summary": "=Kickoff Meeting - {{ $('Normalize Client Data').item.json.clientName }}"
+        }
+      },
+      "id": "52e3f50e-6c9f-48a4-b58d-93fd951f6393",
+      "name": "Schedule Kickoff Meeting",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        640,
+        416
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Workflow Configuration').first().json.crmApiUrl }}",
+        "authentication": "predefinedCredentialType",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"name\": \"{{ $json.clientName }}\",\n  \"email\": \"{{ $json.clientEmail }}\",\n  \"company\": \"{{ $json.company }}\",\n  \"phone\": \"{{ $json.phone }}\",\n  \"projectType\": \"{{ $json.projectType }}\",\n  \"status\": \"onboarding\",\n  \"onboardingData\": {{ $json.message.content || \"{}\" }}\n}",
+        "options": {}
+      },
+      "id": "b950f556-f87a-49ec-a840-8894bd54c90d",
+      "name": "Sync to CRM",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        896,
+        416
+      ],
+      "typeVersion": 4.3
+    },
+    {
+      "parameters": {
+        "content": "## 2. Normalization \n\nCleans, formats, and standardizes the raw input fields received from the form so downstream nodes receive consistent data.\n",
+        "height": 224,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1360,
+        160
+      ],
+      "id": "43a8c370-661b-446e-9389-6bb88368f3e7",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## 3. Wait\n\nPauses workflow execution briefly to prevent hitting rate limits before passing data to the LLM.\n",
+        "height": 208,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1104,
+        176
+      ],
+      "id": "1872b4be-89bb-45da-ad63-79a77f36170e",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## 4. Personalized Checklist & Task Generation\n\nAutomatically generates a tailored onboarding checklist and first-step tasks customized to the client's project.\n",
+        "height": 272,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -816,
+        112
+      ],
+      "id": "3d61cd81-6b65-4492-93d5-dea89bc53290",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert consultant onboarding assistant. Based on the client information and project type provided, generate:\n\n1. A comprehensive onboarding checklist (5-8 items) tailored to the project type\n2. First 3-5 actionable tasks to get started\n3. Key deliverables and milestones\n\nFormat your response as JSON with the following structure:\n{\n  \"checklist\": [\"item1\", \"item2\", ...],\n  \"firstTasks\": [\"task1\", \"task2\", ...],\n  \"deliverables\": [\"deliverable1\", \"deliverable2\", ...]\n}\n\nTailor recommendations based on project type:\n- Strategy: Focus on analysis, planning, and strategic frameworks\n- Management: Focus on process optimization, team coordination, and implementation\n- IT: Focus on technical requirements, system architecture, and development phases\n\nClient Name: {{ $('Normalize Client Data').item.json.clientName }}\nProject Type: {{ $('Normalize Client Data').item.json.projectType }}\nClient Company: {{ $('Normalize Client Data').item.json.company }}",
+        "needsFallback": true
+      },
+      "id": "6112d676-eaae-4305-9450-e01eaa4f651c",
+      "name": "Checklist & Task",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        -800,
+        416
+      ],
+      "typeVersion": 1.5,
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "content": "## 5. Smart Routing & Team Distribution\n\nInspects the project category chosen by the client and splits the workflow execution down one of three specific paths based on rules: Strategy, Management, or IT.\n",
+        "height": 304,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        80
+      ],
+      "id": "dca52e3c-a37f-4a85-87e1-968377c968ae",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## 6. Team-based Record Storage\n\nAppends or updates the client’s onboarding record in the dedicated Google Sheet.\n",
+        "height": 192,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        32
+      ],
+      "id": "cf92c922-1d45-4f3c-af8e-dd42c45c0e27",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## 7. Internal Notification\n\nSends a formatted Slack notification containing the onboarding checklist and first-step tasks directly to the Strategy team’s channel.\n",
+        "height": 224,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2e34de75-062c-44f2-849d-fa864d711dc2",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## 8. Client Communication\n\nAutomatically sends a personalized welcome email containing the onboarding checklist and first-step tasks directly to the client's email address.\n",
+        "height": 240,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        304,
+        160
+      ],
+      "id": "19f3d301-13b4-4602-8209-6ad36d3bf86d",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "## 9. Meeting Scheduling\n\nCreates an automated kickoff meeting on Google Calendar and sends to the client.\n",
+        "height": 192,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        208
+      ],
+      "id": "c1373151-612d-4328-bcfd-880d359f7a99",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "## 10. CRM Logging (Optional)\n\nPushes the new client's structured profile, checklist, and appointment details into an external CRM platform (e.g., HubSpot, Salesforce, or a custom API).\n",
+        "height": 272,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        816,
+        128
+      ],
+      "id": "955c6126-a32d-453e-9250-dd1a3f9a5c28",
+      "name": "Sticky Note11"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Normalize Client Data": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Checklist & Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Checklist & Task",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Checklist & Task",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Client Intake Form": {
+      "main": [
+        [
+          {
+            "node": "Normalize Client Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Project Type": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets - Strategy",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log to Google Sheets - Management",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log to Google Sheets - IT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log to Google Sheets - Strategy": {
+      "main": [
+        [
+          {
+            "node": "Notify Strategy Consultant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log to Google Sheets - Management": {
+      "main": [
+        [
+          {
+            "node": "Notify Management Consultant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log to Google Sheets - IT": {
+      "main": [
+        [
+          {
+            "node": "Notify IT Consultant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Strategy Consultant": {
+      "main": [
+        [
+          {
+            "node": "Send Email to Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Management Consultant": {
+      "main": [
+        [
+          {
+            "node": "Send Email to Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify IT Consultant": {
+      "main": [
+        [
+          {
+            "node": "Send Email to Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email to Client": {
+      "main": [
+        [
+          {
+            "node": "Schedule Kickoff Meeting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Checklist & Task": {
+      "main": [
+        [
+          {
+            "node": "Route by Project Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Kickoff Meeting": {
+      "main": [
+        [
+          {
+            "node": "Sync to CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "fbc8488d-2321-4333-8dc3-1b4d767cac1c",
+  "meta": {
+    "instanceId": "7eae1474f58bf59b6026df621cc31fd803b5d9caa6c69c1c97c29d9914015a79"
+  },
+  "nodeGroups": [],
+  "id": "G4bSOtAEsoG3ZHsj",
+  "tags": []
+}
